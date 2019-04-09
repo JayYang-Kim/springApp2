@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:websocket="http://www.springframework.org/schema/websocket"
+	xsi:schemaLocation="
+	    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	    http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+        http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
+        http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket.xsd">
+
+	<!-- Service 객체 생성 -->
+	<bean id="userServiceTarget" class="aop.after.UserServiceImpl"/>
+	
+	<!-- Advice : 공통 관심 기능을 핵심 로직에 적용할지 정의(공통사항) -->
+	<bean id="afterAdvice" class="aop.after.AfterAdvice"/>
+	
+	<!-- Advisor 설정 : pointcut + advice 동시 설정 -->
+	<bean id="userAdvisor" class="org.springframework.aop.support.RegexpMethodPointcutAdvisor">
+		<property name="advice" ref="afterAdvice"/>
+		<property name="patterns">
+			<list>
+				<value>.*save.*</value>
+				<value>.*write.*</value>
+			</list>
+		</property>
+	</bean>
+	
+	<!-- AOP 적용 -->
+	<bean id="userService" class="org.springframework.aop.framework.ProxyFactoryBean">
+		<property name="target" ref="userServiceTarget"/> <!-- 적용 대상 -->
+		<property name="interceptorNames">
+			<list>
+				<value>userAdvisor</value>
+			</list>
+		</property>
+	</bean>
+</beans>
